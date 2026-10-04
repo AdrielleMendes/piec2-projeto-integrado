@@ -1,0 +1,266 @@
+from __future__ import annotations
+
+import sqlite3
+from dataclasses import dataclass
+from typing import Iterable, Optional
+
+import numpy as np
+
+from .database import Database
+
+@dataclass
+class Pessoa:
+    id: Optional[int]
+    nome: str
+    documento: Optional[str] = None
+    email: Optional[str] = None
+    ativo: int = 1
+
+
+@dataclass
+class Face:
+    id: Optional[int]
+    pessoa_id: int
+    embedding: np.ndarray
+    modelo: str
+    versao_modelo: str
+    qualidade: Optional[float] = None
+    imagem_path: Optional[str] = None
+    ativo: int = 1
+
+class PessoaRepo:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def criar(self, pessoa: Pessoa) -> int:
+        with self.db.cursor() as cur:
+            cur.execute(
+                """INSERT INTO pessoas (nome, documento, email, ativo)
+                   VALUES (?, ?, ?, ?)""",
+                (pessoa.nome, pessoa.documento, pessoa.email, pessoa.ativo),
+            )
+            return cur.lastrowid
+
+    def buscar_por_id(self, pessoa_id: int) -> Optional[sqlite3.Row]:
+        with self.db.cursor() as cur:
+            cur.execute("SELECT * FROM pessoas WHERE id = ?", (pessoa_id,))
+            return cur.fetchone()
+
+    def buscar_por_documento(self, documento: str) -> Optional[sqlite3.Row]:
+        with self.db.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM pessoas WHERE documento = ?", (documento,)
+            )
+            return cur.fetchone()
+
+    def listar(self, apenas_ativos: bool = True) -> list[sqlite3.Row]:
+        sql = "SELECT * FROM pessoas"
+        if apenas_ativos:
+            sql += " WHERE ativo = 1"
+        sql += " ORDER BY nome"
+        with self.db.cursor() as cur:
+            cur.execute(sql)
+            return cur.fetchall()
+
+    def desativar(self, pessoa_id: int) -> None:
+        with self.db.cursor() as cur:
+            cur.execute(
+                "UPDATE pessoas SET ativo = 0 WHERE id = ?", (pessoa_id,)
+            )
+
+    def deletar(self, pessoa_id: int) -> None:
+        with self.db.cursor() as cur:
+            cur.execute("DELETE FROM pessoas WHERE id = ?", (pessoa_id,))
+
+
+class FaceRepo:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def adicionar(self, face: Face) -> int:
+        blob = self.db.embedding_to_blob(face.embedding)
+        dimensao = int(np.asarray(face.embedding).size)
+        with self.db.cursor() as cur:
+            cur.execute(
+                """INSERT INTO faces
+                   (pessoa_id, embedding, dimensao, modelo, versao_modelo,
+                    qualidade, imagem_path, ativo)
+                   VALUES (?, ?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    face.pessoa_id,
+                    blob,
+                    dimensao,
+                    face.modelo,
+                    face.versao_modelo,
+                    face.qualidade,
+                    face.imagem_path,
+                    face.ativo,
+                ),
+            )
+            return cur.lastrowid
+
+    def listar_por_pessoa(self, pessoa_id: int) -> list[sqlite3.Row]:
+        with self.db.cursor() as cur:
+            cur.execute(
+                "SELECT * FROM faces WHERE pessoa_id = ? AND ativo = 1",
+                (pessoa_id,),
+            )
+            return cur.fetchall()
+
+    def carregar_embeddings(
+        self, modelo: str, versao_modelo: str
+    ) -> list[tuple[int, int, np.ndarray]]:
+        """
+        Retorna [(face_id, pessoa_id, embedding), ...]
+        já filtrado pelo modelo/versão para comparação correta.
+        """
+        with self.db.cursor() as cur:
+            cur.execute(
+                """SELECT id, pessoa_id, embedding
+                   FROM faces
+                   WHERE ativo = 1 AND modelo = ? AND versao_modelo = ?""",
+                (modelo, versao_modelo),
+            )
+            rows = cur.fetchall()
+
+        resultado: list[tuple[int, int, np.ndarray]] = []
+        for r in rows:
+            emb = self.db.blob_to_embedding(r["embedding"])
+            resultado.append((r["id"], r["pessoa_id"], emb))
+        return resultado
+
+    def desativar(self, face_id: int) -> None:
+        with self.db.cursor() as cur:
+            cur.execute("UPDATE faces SET ativo = 0 WHERE id = ?", (face_id,))
+
+
+class CameraRepo:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def criar(self, nome: str, local: str | None = None, url: str | None = None) -> int:
+        with self.db.cursor() as cur:
+            cur.execute(
+                "INSERT INTO cameras (nome, local, url) VALUES (?, ?, ?)",
+                (nome, local, url),
+            )
+            return cur.lastrowid
+
+    def listar(self) -> list[sqlite3.Row]:
+        with self.db.cursor() as cur:
+            cur.execute("SELECT * FROM cameras WHERE ativo = 1")
+            return cur.fetchall()
+
+
+class ReconhecimentoRepo:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def registrar(
+        self,
+        similaridade: float,
+        limiar: float,
+        status: str,
+        pessoa_id: int | None = None,
+        face_id: int | None = None,
+        camera_id: int | None = None,
+        imagem_captura_path: str | None = None,
+    ) -> int:
+        if status not in ("match", "desconhecido", "baixa_qualidade"):
+            raise ValueError(f"status inválido: {status}")
+        with self.db.cursor() as cur:
+            cur.execute(
+                """INSERT INTO reconhecimentos
+                   (face_id, pessoa_id, camera_id, similaridade, limiar,
+                    status, imagem_captura_path)
+                   VALUES (?, ?, ?, ?, ?, ?, ?)""",
+                (
+                    face_id,
+                    pessoa_id,
+                    camera_id,
+                    float(similaridade),
+                    float(limiar),
+                    status,
+                    imagem_captura_path,
+                ),
+            )
+            return cur.lastrowid
+
+    def ultimos(self, limite: int = 50) -> list[sqlite3.Row]:
+        with self.db.cursor() as cur:
+            cur.execute(
+                """SELECT r.*, p.nome AS pessoa_nome, c.nome AS camera_nome
+                   FROM reconhecimentos r
+                   LEFT JOIN pessoas p ON p.id = r.pessoa_id
+                   LEFT JOIN cameras c ON c.id = r.camera_id
+                   ORDER BY r.criado_em DESC
+                   LIMIT ?""",
+                (limite,),
+            )
+            return cur.fetchall()
+
+
+class ConsentimentoRepo:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def registrar(
+        self,
+        pessoa_id: int,
+        finalidade: str,
+        texto_versao: str | None = None,
+    ) -> int:
+        with self.db.cursor() as cur:
+            cur.execute(
+                """INSERT INTO consentimentos
+                   (pessoa_id, finalidade, texto_versao, data_consentimento)
+                   VALUES (?, ?, ?, datetime('now'))""",
+                (pessoa_id, finalidade, texto_versao),
+            )
+            return cur.lastrowid
+
+    def revogar(self, consentimento_id: int) -> None:
+        with self.db.cursor() as cur:
+            cur.execute(
+                """UPDATE consentimentos
+                   SET ativo = 0, data_revogacao = datetime('now')
+                   WHERE id = ?""",
+                (consentimento_id,),
+            )
+
+
+class ConfiguracaoRepo:
+    def __init__(self, db: Database) -> None:
+        self.db = db
+
+    def set(self, chave: str, valor: str) -> None:
+        with self.db.cursor() as cur:
+            cur.execute(
+                """INSERT INTO configuracoes (chave, valor)
+                   VALUES (?, ?)
+                   ON CONFLICT(chave) DO UPDATE SET
+                       valor = excluded.valor,
+                       atualizado_em = datetime('now')""",
+                (chave, valor),
+            )
+
+    def get(self, chave: str, default: str | None = None) -> str | None:
+        with self.db.cursor() as cur:
+            cur.execute("SELECT valor FROM configuracoes WHERE chave = ?", (chave,))
+            row = cur.fetchone()
+            return row["valor"] if row else default
+
+class FaceDB:
+    """Fachada única para acesso a todos os repositórios."""
+
+    def __init__(self, path: str = "face.db", criar_schema: bool = True) -> None:
+        self.db = Database(path)
+        if criar_schema:
+            self.db.init_schema()
+
+        self.pessoas = PessoaRepo(self.db)
+        self.faces = FaceRepo(self.db)
+        self.cameras = CameraRepo(self.db)
+        self.reconhecimentos = ReconhecimentoRepo(self.db)
+        self.consentimentos = ConsentimentoRepo(self.db)
+        self.config = ConfiguracaoRepo(self.db)
