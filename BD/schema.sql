@@ -1,6 +1,20 @@
 PRAGMA foreign_keys = ON;
 PRAGMA journal_mode = WAL;
 
+-- ========== Captação de leads (landing page) ==========
+CREATE TABLE IF NOT EXISTS leads (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    name         TEXT    NOT NULL,
+    email        TEXT    NOT NULL,
+    message      TEXT    NOT NULL,
+    status       TEXT    NOT NULL DEFAULT 'Novo',
+    criado_em    TEXT    NOT NULL DEFAULT (datetime('now'))
+);
+
+CREATE INDEX IF NOT EXISTS idx_leads_email  ON leads(email);
+CREATE INDEX IF NOT EXISTS idx_leads_status ON leads(status);
+
+-- ========== Domínio de reconhecimento facial ==========
 CREATE TABLE IF NOT EXISTS pessoas (
     id           INTEGER PRIMARY KEY AUTOINCREMENT,
     nome         TEXT    NOT NULL,
@@ -23,10 +37,8 @@ CREATE TABLE IF NOT EXISTS faces (
     criado_em      TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_faces_pessoa
-    ON faces(pessoa_id);
-CREATE INDEX IF NOT EXISTS idx_faces_modelo
-    ON faces(modelo, versao_modelo);
+CREATE INDEX IF NOT EXISTS idx_faces_pessoa ON faces(pessoa_id);
+CREATE INDEX IF NOT EXISTS idx_faces_modelo ON faces(modelo, versao_modelo);
 
 CREATE TABLE IF NOT EXISTS cameras (
     id     INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,10 +61,8 @@ CREATE TABLE IF NOT EXISTS reconhecimentos (
     criado_em            TEXT    NOT NULL DEFAULT (datetime('now'))
 );
 
-CREATE INDEX IF NOT EXISTS idx_reconhecimentos_data
-    ON reconhecimentos(criado_em);
-CREATE INDEX IF NOT EXISTS idx_reconhecimentos_pessoa
-    ON reconhecimentos(pessoa_id);
+CREATE INDEX IF NOT EXISTS idx_reconhecimentos_data   ON reconhecimentos(criado_em);
+CREATE INDEX IF NOT EXISTS idx_reconhecimentos_pessoa ON reconhecimentos(pessoa_id);
 
 CREATE TABLE IF NOT EXISTS consentimentos (
     id                  INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -64,8 +74,7 @@ CREATE TABLE IF NOT EXISTS consentimentos (
     ativo               INTEGER NOT NULL DEFAULT 1
 );
 
-CREATE INDEX IF NOT EXISTS idx_consentimentos_pessoa
-    ON consentimentos(pessoa_id);
+CREATE INDEX IF NOT EXISTS idx_consentimentos_pessoa ON consentimentos(pessoa_id);
 
 CREATE TABLE IF NOT EXISTS configuracoes (
     chave          TEXT PRIMARY KEY,
