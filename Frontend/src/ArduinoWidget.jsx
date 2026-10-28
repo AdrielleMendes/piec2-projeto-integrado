@@ -6,17 +6,19 @@ export default function ArduinoWidget() {
   const [conectado, setConectado] = useState(false);
 
   useEffect(() => {
-    const socket = io('COLE_O_SEU_LINK_AQUI');
+    const socket = io('http://localhost:3001');
 
     socket.on('connect', () => setConectado(true));
     socket.on('disconnect', () => setConectado(false));
 
-    socket.on('sensorData', (data) => {
+    socket.on('dados-sensor', (data) => {
+      const temPresenca = data.distancia !== undefined && data.distancia > 0 && data.distancia < 30;
+
       setDados({
-        temperatura: data.temperatura ?? '0.0',
-        umidade: data.umidade ?? data.humidade ?? '0.0', 
+        temperatura: data.temperatura !== null ? data.temperatura.toFixed(1) : '0.0',
+        umidade: data.humidade !== null ? data.humidade.toFixed(1) : '0.0', 
         fumaca: data.fumaca ?? 0,
-        presenca: data.presenca ?? false
+        presenca: data.presenca ?? temPresenca
       });
     });
 
