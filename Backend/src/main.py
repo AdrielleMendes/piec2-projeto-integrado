@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import time
 from src.api.routes.routes import router as leads_router
+from src.api.routes.devices import router as devices_router
+from src.api.routes.orders import router as orders_router
 
 app = FastAPI(
     title="SafeHouse API",
@@ -12,7 +14,7 @@ app = FastAPI(
 # Config do CORS pra permitir requisições do frontend
 origins = [
     "http://localhost:5173", #porta indicada lá no frontend
-    "http://localhost:5173",
+    "http://localhost:7100", #porta de preview do Kimi Work
 ]
 
 app.add_middleware(
@@ -24,6 +26,8 @@ app.add_middleware(
 )
 
 app.include_router(leads_router) # add as rotas do leads_router no app principal
+app.include_router(devices_router) # catálogo de dispositivos da página de adesão
+app.include_router(orders_router) # pedidos de adesão
 
 @app.get("/health")
 async def health_check():

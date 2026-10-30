@@ -1,4 +1,4 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 import { ChevronRight, Headset, ShieldCheck } from 'lucide-react';
 
 export default function HeroSection() {
@@ -46,13 +46,13 @@ export default function HeroSection() {
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
           
           {/* Botão Principal: Azul Primário NexGuard */}
-          <a
-            href="#contato"
+          <Link
+            to="/adesao"
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 cursor-pointer text-sm"
           >
             <span>Proteger Minha Casa</span>
             <ChevronRight className="w-4 h-4" />
-          </a>
+          </Link>
 
           {/* Botão Secundário: Slate Escuro com Bordas em Azul Sutil */}
           <a
