@@ -47,7 +47,7 @@ export default function HeroSection() {
           
           {/* Botão Principal: Azul Primário NexGuard */}
           <Link
-            to="/adesao"
+            to="/planos"
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/30 hover:shadow-blue-500/50 cursor-pointer text-sm"
           >
             <span>Proteger Minha Casa</span>

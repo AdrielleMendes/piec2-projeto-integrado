@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
+import Planos from './pages/Planos';
 import Adesao from './pages/Adesao';
 
 export default function App() {
@@ -11,6 +12,7 @@ export default function App() {
         <Navbar />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/planos" element={<Planos />} />
           <Route path="/adesao" element={<Adesao />} />
         </Routes>
         <Footer />

@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { ShieldCheck, AlertCircle, RefreshCw, CheckCircle2, PackageCheck } from 'lucide-react';
+import { Link, useLocation } from 'react-router-dom';
+import { ShieldCheck, AlertCircle, RefreshCw, CheckCircle2, PackageCheck, Package } from 'lucide-react';
 import DeviceCard from './components/DeviceCard';
 import CartSummary from './components/CartSummary';
 import AddressForm from './components/AddressForm';
@@ -8,12 +8,16 @@ import { fetchDevices, createOrder } from '../../services/api';
 import { formatCurrency } from '../../utils/format';
 
 export default function Adesao() {
+  const location = useLocation();
+  const planName = location.state?.planName ?? null;
+
   const [devices, setDevices] = useState([]);
   const [loadingDevices, setLoadingDevices] = useState(true);
   const [devicesError, setDevicesError] = useState(null);
 
   // Mapa de seleção: { [deviceId]: quantidade }
-  const [selection, setSelection] = useState({});
+  // Pode vir pré-selecionado a partir de um pacote pronto (página /planos).
+  const [selection, setSelection] = useState(() => location.state?.preselect ?? {});
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -201,6 +205,17 @@ export default function Adesao() {
             Selecione e configure os dispositivos para a sua proteção. Os valores são calculados em tempo real e a instalação é realizada pela equipe técnica NexGuard.
           </p>
         </header>
+
+        {/* Aviso de pacote pronto aplicado */}
+        {planName && (
+          <div className="max-w-3xl mx-auto mb-10 flex items-center gap-3 bg-blue-500/10 border border-blue-500/30 rounded-xl px-5 py-4">
+            <Package className="w-5 h-5 text-blue-400 shrink-0" />
+            <p className="text-sm text-slate-300 leading-relaxed">
+              O pacote <span className="text-blue-400 font-semibold">{planName}</span> já está selecionado abaixo.
+              Ajuste os dispositivos e quantidades como quiser antes de confirmar.
+            </p>
+          </div>
+        )}
 
         {/* Catálogo de Dispositivos */}
         <section id="catalogo" className="scroll-mt-24 mb-16">
