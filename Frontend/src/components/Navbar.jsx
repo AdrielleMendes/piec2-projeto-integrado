@@ -1,11 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, Menu, X, Lock } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Link, useLocation } from 'react-router-dom';
+import { Shield, Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isLightMode, setIsLightMode] = useState(false);
+  const location = useLocation();
+
+  // Âncoras da home: mantém rolagem suave na home e funciona a partir de outras páginas
+  const isHome = location.pathname === '/';
+  const anchor = (id) => (isHome ? `#${id}` : `/#${id}`);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -67,8 +73,8 @@ export default function Navbar() {
           <div className="flex items-center justify-between">
             
             {/* Logo (Esquerda) */}
-            <a 
-              href="#" 
+            <Link
+              to="/"
               className={`flex items-center gap-2 font-bold text-xl tracking-tight transition-colors duration-500 ${
                 isLightMode && scrolled ? "text-slate-900" : "text-white"
               }`}
@@ -77,7 +83,7 @@ export default function Navbar() {
                 <Shield className="w-5 h-5 text-white" />
               </div>
               <span>Nex<span className="text-blue-500">Guard</span></span>
-            </a>
+            </Link>
 
             {/* Grupo da Direita: Links + Botão */}
             <div className="hidden md:flex items-center gap-8">
@@ -86,16 +92,10 @@ export default function Navbar() {
               <div className={`flex items-center gap-8 text-sm font-medium transition-colors duration-500 ${
                 isLightMode && scrolled ? "text-slate-700" : "text-slate-300"
               }`}>
-                <a href="#sobre" className="hover:text-blue-500 transition-colors">A Empresa</a>
-                <a href="#servicos" className="hover:text-blue-500 transition-colors">Serviços</a>
-                <a href="#tecnologia" className="hover:text-blue-500 transition-colors">Tecnologia</a>
+                <a href={anchor('sobre')} className="hover:text-blue-500 transition-colors">A Empresa</a>
+                <a href={anchor('servicos')} className="hover:text-blue-500 transition-colors">Serviços</a>
+                <a href={anchor('tecnologia')} className="hover:text-blue-500 transition-colors">Tecnologia</a>
               </div>
-
-              {/* Botão Área do Cliente */}
-              <button className="flex items-center gap-2 px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 rounded-xl transition-all duration-300 cursor-pointer shadow-lg shadow-blue-500/20">
-                <Lock className="w-3.5 h-3.5 text-white" />
-                Área do Cliente
-              </button>
 
             </div>
 
@@ -122,30 +122,26 @@ export default function Navbar() {
               : "bg-slate-950/95 border-slate-800"
           }`}>
             <a 
-              href="#sobre" 
+              href={anchor('sobre')} 
               onClick={() => setMobileMenuOpen(false)} 
               className={`block py-2 ${isLightMode && scrolled ? "text-slate-800" : "text-slate-300"}`}
             >
               A Empresa
             </a>
             <a 
-              href="#servicos" 
+              href={anchor('servicos')} 
               onClick={() => setMobileMenuOpen(false)} 
               className={`block py-2 ${isLightMode && scrolled ? "text-slate-800" : "text-slate-300"}`}
             >
               Serviços
             </a>
             <a 
-              href="#tecnologia" 
+              href={anchor('tecnologia')} 
               onClick={() => setMobileMenuOpen(false)} 
               className={`block py-2 ${isLightMode && scrolled ? "text-slate-800" : "text-slate-300"}`}
             >
               Tecnologia
             </a>
-            <button className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-xs font-semibold text-white bg-blue-600 rounded-xl mt-4">
-              <Lock className="w-3.5 h-3.5" />
-              Área do Cliente
-            </button>
           </div>
         )}
       </nav>
