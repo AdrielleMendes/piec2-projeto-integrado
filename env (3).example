@@ -1,0 +1,31 @@
+# Segredos: gere com `python scripts/generate_secrets.py` e nunca publique o .env.
+ADMIN_API_KEY=COLOQUE_UMA_CHAVE_ADMINISTRATIVA_FORTE
+DEVICE_API_KEY=COLOQUE_UMA_CHAVE_EXCLUSIVA_DO_DISPOSITIVO
+LIVENESS_DEVICE_KEY=COLOQUE_UMA_CHAVE_DO_MODULO_DE_PROVA_DE_PRESENCA
+SESSION_SECRET=COLOQUE_UM_SEGREDO_LONGO_ALEATORIO
+FERNET_KEY=COLOQUE_UMA_CHAVE_FERNET_GERADA
+
+# Backend
+DATABASE_PATH=Backend/data/nexguard.db
+MODEL_DIR=Backend/models
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
+MATCH_THRESHOLD=0.45
+MIN_FACE_SIZE=100
+MAX_IMAGE_BYTES=4194304
+
+# A fechadura permanece desativada até a configuração do hardware.
+PHYSICAL_UNLOCK_ENABLED=false
+DOOR_RELAY_MODE=disabled
+DOOR_RELAY_PULSE_MS=1200
+
+# Para um controlador externo (por exemplo, ESP32 com firmware próprio):
+# PHYSICAL_UNLOCK_ENABLED=true
+# DOOR_RELAY_MODE=http
+# DOOR_RELAY_URL=http://192.168.1.50
+# DOOR_RELAY_TOKEN=SEGREDO_DO_CONTROLADOR
+
+# Para Raspberry Pi com relé compatível com gpiozero:
+# PHYSICAL_UNLOCK_ENABLED=true
+# DOOR_RELAY_MODE=gpio
+# DOOR_GPIO_PIN=17
+# DOOR_GPIO_ACTIVE_HIGH=true

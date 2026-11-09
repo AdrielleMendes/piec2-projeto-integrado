@@ -1,0 +1,11 @@
+.env
+.env.local
+.venv/
+__pycache__/
+*.py[cod]
+Backend/data/*.db
+Backend/data/*.db-shm
+Backend/data/*.db-wal
+Backend/models/*.onnx
+Frontend/node_modules/
+Frontend/dist/
