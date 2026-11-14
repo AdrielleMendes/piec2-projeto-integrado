@@ -1,1 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
+
+@theme {
+  --font-sans: "Manrope", "Segoe UI", sans-serif;
+}
+
+:root {
+  --nx-slate-950: oklch(0.16 0.025 255);
+  --nx-slate-900: oklch(0.21 0.025 255);
+  --nx-slate-880: oklch(0.23 0.027 255);
+  --nx-bg: var(--nx-slate-950);
+  --nx-panel: var(--nx-slate-900);
+  --nx-sidebar: var(--nx-slate-950);
+  --nx-security: var(--nx-slate-880);
+  color-scheme: dark;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100dvh;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -19,7 +19,7 @@ const io = new Server(server, {
 app.use(express.static('public'));
 
 const port = new SerialPort({
-  path: 'COM4',
+  path: 'COM3',
   baudRate: 9600,
   autoOpen: true
 });
@@ -27,7 +27,7 @@ const port = new SerialPort({
 const parser = port.pipe(new ReadlineParser({ delimiter: '\r\n' }));
 
 port.on('open', () => {
-  console.log('Porta COM4 aberta com sucesso.');
+  console.log('Porta COM3 aberta com sucesso.');
 });
 
 port.on('error', (err) => {
