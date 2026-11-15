@@ -25,8 +25,8 @@ async function request(path, options = {}) {
   let response;
   try {
     response = await fetch(`${API_BASE_URL}${path}`, {
-      headers: { 'Content-Type': 'application/json', ...options.headers },
       ...options,
+      headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
     });
   } catch {
     throw new Error('Não foi possível conectar ao servidor. Verifique se a API está no ar.');
