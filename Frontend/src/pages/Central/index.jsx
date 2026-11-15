@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 import {
   Activity,
   ArrowLeft,
-  BatteryMedium,
   Camera,
   Cctv,
   Check,
@@ -21,11 +20,12 @@ import {
   ScanLine,
   Shield,
   ShieldCheck,
-  Siren,
+  TriangleAlert,
   UnlockKeyhole,
   Wifi,
   X,
 } from 'lucide-react';
+import useTelemetry from '../../hooks/useTelemetry';
 import CameraCard from './components/CameraCard';
 import SensorRow from './components/SensorRow';
 import { buildDashboardData, INITIAL_EVENTS } from './data';
@@ -41,6 +41,51 @@ const VIEW_TITLES = {
   cameras: 'Câmeras da residência',
   devices: 'Dispositivos conectados',
 };
+
+function getLiveSensor(sensor, telemetry) {
+  if (!sensor.telemetryKey) return sensor;
+
+  const { connected, reading, lastUpdate } = telemetry;
+  const values = {
+    presence: reading.presenca,
+    smoke: reading.fumaca,
+    temperature: reading.temperatura,
+    humidity: reading.humidade,
+  };
+  const value = values[sensor.telemetryKey];
+  const updatedDetail = lastUpdate
+    ? `Atualizado às ${lastUpdate.toLocaleTimeString('pt-BR')}`
+    : connected ? 'Aguardando dados do Arduino' : 'Telemetria desconectada';
+
+  if (value == null) {
+    return { ...sensor, status: 'Sem leitura', detail: updatedDetail, tone: 'neutral' };
+  }
+
+  if (sensor.telemetryKey === 'presence') {
+    return {
+      ...sensor,
+      status: value ? 'Presença detectada' : 'Sem movimento',
+      detail: updatedDetail,
+      tone: value ? 'alert' : 'safe',
+    };
+  }
+
+  if (sensor.telemetryKey === 'smoke') {
+    const isAlert = Number(value) > 400;
+    return {
+      ...sensor,
+      status: `${value} ppm`,
+      detail: isAlert ? 'Nível acima do limite de segurança' : updatedDetail,
+      tone: isAlert ? 'alert' : 'safe',
+    };
+  }
+
+  if (sensor.telemetryKey === 'temperature') {
+    return { ...sensor, status: `${Number(value).toFixed(1)} °C`, detail: updatedDetail, tone: 'safe' };
+  }
+
+  return { ...sensor, status: `${Number(value).toFixed(1)}%`, detail: updatedDetail, tone: 'safe' };
+}
 
 function NavButton({ item, active, onClick, mobile = false }) {
   const Icon = item.icon;
@@ -64,14 +109,19 @@ function NavButton({ item, active, onClick, mobile = false }) {
 }
 
 function StatCard({ icon: Icon, label, value, detail, tone = 'blue' }) {
-  const toneClasses = tone === 'green' ? 'bg-emerald-400/10 text-emerald-300' : 'bg-blue-400/10 text-blue-300';
+  const tones = {
+    blue: { icon: 'bg-blue-400/10 text-blue-300', dot: 'bg-blue-400' },
+    green: { icon: 'bg-emerald-400/10 text-emerald-300', dot: 'bg-emerald-400' },
+    red: { icon: 'bg-red-400/10 text-red-300', dot: 'bg-red-400' },
+  };
+  const toneClasses = tones[tone] ?? tones.blue;
   return (
     <article className="min-w-0 rounded-2xl border border-white/[0.07] bg-[var(--nx-panel)] p-4 sm:p-5">
       <div className="flex items-start justify-between gap-3">
-        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${toneClasses}`}>
+        <div className={`flex h-10 w-10 items-center justify-center rounded-xl ${toneClasses.icon}`}>
           <Icon className="h-5 w-5" />
         </div>
-        <span className="mt-1 h-2 w-2 shrink-0 rounded-full bg-emerald-400" />
+        <span className={`mt-1 h-2 w-2 shrink-0 rounded-full ${toneClasses.dot}`} />
       </div>
       <p className="mt-4 text-2xl font-bold tracking-tight text-white">{value}</p>
       <p className="mt-1 truncate text-sm font-medium text-slate-300">{label}</p>
@@ -85,7 +135,7 @@ function EmptyState({ type }) {
   return (
     <div className="rounded-2xl border border-dashed border-slate-700 bg-slate-900/40 px-6 py-12 text-center">
       {isCamera ? <Cctv className="mx-auto h-8 w-8 text-slate-500" /> : <Radio className="mx-auto h-8 w-8 text-slate-500" />}
-      <h3 className="mt-4 text-base font-bold text-white">Nenhum {isCamera ? 'câmera instalada' : 'sensor instalado'}</h3>
+      <h3 className="mt-4 text-base font-bold text-white">{isCamera ? 'Nenhuma câmera instalada' : 'Nenhum sensor instalado'}</h3>
       <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-400">
         Adicione este equipamento à sua adesão para acompanhar o status por aqui.
       </p>
@@ -99,10 +149,10 @@ function EmptyState({ type }) {
   );
 }
 
-function OtherDeviceRow({ device, locked, sirenArmed, onToggleLock, onToggleSiren }) {
-  const Icon = device.type === 'lock' ? LockKeyhole : device.type === 'siren' ? Siren : Cpu;
-  const isControllable = device.type === 'lock' || device.type === 'siren';
-  const status = device.type === 'lock' ? (locked ? 'Trancada' : 'Destrancada') : device.type === 'siren' ? (sirenArmed ? 'Armada' : 'Desarmada') : 'Online';
+function OtherDeviceRow({ device, locked, onToggleLock }) {
+  const isLock = device.type === 'lock';
+  const Icon = isLock ? LockKeyhole : Cpu;
+  const status = isLock ? (locked ? 'Trancada' : 'Destrancada') : 'Online';
 
   return (
     <div className="flex flex-col gap-4 rounded-2xl border border-white/[0.07] bg-[var(--nx-panel)] p-5 sm:flex-row sm:items-center">
@@ -119,23 +169,23 @@ function OtherDeviceRow({ device, locked, sirenArmed, onToggleLock, onToggleSire
           </p>
         </div>
       </div>
-      {isControllable && (
+      {isLock ? (
         <button
           type="button"
-          onClick={device.type === 'lock' ? onToggleLock : onToggleSiren}
+          onClick={onToggleLock}
           className="inline-flex min-h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-700 px-4 text-sm font-semibold text-slate-200 transition hover:border-slate-500 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 cursor-pointer"
         >
-          {device.type === 'lock' ? (locked ? <UnlockKeyhole className="h-4 w-4" /> : <LockKeyhole className="h-4 w-4" />) : <Siren className="h-4 w-4" />}
-          {device.type === 'lock' ? (locked ? 'Destrancar' : 'Trancar') : sirenArmed ? 'Desarmar' : 'Armar'}
+          {locked ? <UnlockKeyhole className="h-4 w-4" /> : <LockKeyhole className="h-4 w-4" />}
+          {locked ? 'Destrancar' : 'Trancar'}
         </button>
-      )}
-      {!isControllable && <BatteryMedium className="hidden h-5 w-5 text-slate-600 sm:block" />}
+      ) : <Wifi className="hidden h-5 w-5 text-slate-600 sm:block" />}
     </div>
   );
 }
 
 export default function Central() {
   const location = useLocation();
+  const telemetry = useTelemetry();
   const { cameras, sensors, otherDevices } = useMemo(
     () => buildDashboardData(location.state?.selectedDevices),
     [location.state?.selectedDevices]
@@ -144,7 +194,6 @@ export default function Central() {
   const [activeView, setActiveView] = useState('overview');
   const [mode, setMode] = useState('home');
   const [locked, setLocked] = useState(true);
-  const [sirenArmed, setSirenArmed] = useState(true);
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [streamPaused, setStreamPaused] = useState(false);
   const [toast, setToast] = useState('');
@@ -153,6 +202,10 @@ export default function Central() {
   const customerName = location.state?.customerName?.split(' ')[0] ?? 'João';
   const hasLock = otherDevices.some((device) => device.type === 'lock');
   const currentDate = new Intl.DateTimeFormat('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }).format(new Date());
+  const liveSensors = sensors.map((sensor) => getLiveSensor(sensor, telemetry));
+  const smokeAlert = telemetry.reading.fumaca != null && Number(telemetry.reading.fumaca) > 400;
+  const presenceAlert = mode === 'away' && telemetry.reading.presenca === true;
+  const hasAlert = smokeAlert || presenceAlert;
 
   useEffect(() => {
     if (!selectedCamera) return undefined;
@@ -190,13 +243,6 @@ export default function Central() {
     setToast(nextLocked ? 'Porta principal trancada com segurança.' : 'Porta principal destrancada.');
   };
 
-  const handleToggleSiren = () => {
-    const nextArmed = !sirenArmed;
-    setSirenArmed(nextArmed);
-    addEvent(nextArmed ? 'Sirene externa armada' : 'Sirene externa desarmada', 'system');
-    setToast(nextArmed ? 'Sirene externa armada.' : 'Sirene externa desarmada.');
-  };
-
   const handleOpenCamera = (camera) => {
     setStreamPaused(false);
     setSelectedCamera(camera);
@@ -208,10 +254,10 @@ export default function Central() {
   };
 
   const stats = [
-    { icon: Cctv, label: 'Câmeras online', value: `${cameras.length}/${cameras.length}`, detail: 'Transmissão estável', tone: 'blue' },
-    { icon: ScanLine, label: 'Sensores ativos', value: `${sensors.length}/${sensors.length}`, detail: 'Todos respondendo', tone: 'green' },
+    { icon: Cctv, label: 'Câmeras online', value: cameras.length ? `${cameras.length}/${cameras.length}` : '0', detail: cameras.length ? 'Transmissão estável' : 'Nenhuma instalada', tone: 'blue' },
+    { icon: ScanLine, label: 'Sensores monitorados', value: `${liveSensors.length}`, detail: telemetry.connected ? 'Telemetria em tempo real' : 'Aguardando telemetria', tone: telemetry.connected ? 'green' : 'blue' },
     { icon: LockKeyhole, label: 'Acesso principal', value: hasLock ? (locked ? 'Trancado' : 'Aberto') : '—', detail: hasLock ? 'Fechadura inteligente' : 'Não instalado', tone: locked ? 'green' : 'blue' },
-    { icon: Wifi, label: 'Central conectada', value: 'Online', detail: 'Rede principal · 4G', tone: 'green' },
+    { icon: Wifi, label: 'Telemetria', value: telemetry.connected ? 'Online' : 'Offline', detail: telemetry.lastUpdate ? 'Recebendo dados do Arduino' : 'Conexão com o servidor local', tone: telemetry.connected ? 'green' : 'red' },
   ];
 
   return (
@@ -239,12 +285,14 @@ export default function Central() {
         </nav>
 
         <div className="mt-auto">
-          <div className="mb-5 rounded-2xl border border-emerald-400/15 bg-emerald-400/[0.06] p-4">
-            <p className="flex items-center gap-2 text-sm font-semibold text-emerald-300">
-              <ShieldCheck className="h-4 w-4" />
-              Sistema operacional
+          <div className={`mb-5 rounded-2xl border p-4 ${telemetry.connected ? 'border-emerald-400/15 bg-emerald-400/[0.06]' : 'border-red-400/20 bg-red-400/[0.06]'}`}>
+            <p className={`flex items-center gap-2 text-sm font-semibold ${telemetry.connected ? 'text-emerald-300' : 'text-red-300'}`}>
+              {telemetry.connected ? <ShieldCheck className="h-4 w-4" /> : <Wifi className="h-4 w-4" />}
+              {telemetry.connected ? 'Telemetria conectada' : 'Telemetria desconectada'}
             </p>
-            <p className="mt-2 text-xs leading-relaxed text-slate-400">Monitoramento NexGuard ativo 24 horas.</p>
+            <p className="mt-2 text-xs leading-relaxed text-slate-400">
+              {telemetry.connected ? 'Recebendo dados dos sensores pelo servidor local.' : 'Tentando reconectar ao servidor na porta 3001.'}
+            </p>
           </div>
           <div className="flex items-center gap-3 border-t border-white/[0.07] px-2 pt-5">
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-sm font-bold text-blue-300">{customerName.charAt(0)}</div>
@@ -269,9 +317,9 @@ export default function Central() {
               </div>
             </div>
             <div className="flex items-center gap-3">
-              <div className="hidden items-center gap-2 text-xs text-slate-400 md:flex">
-                <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                Atualizado agora
+              <div className={`hidden items-center gap-2 text-xs md:flex ${telemetry.connected ? 'text-emerald-300' : 'text-red-300'}`} role="status">
+                <span className={`h-2 w-2 rounded-full ${telemetry.connected ? 'bg-emerald-400' : 'bg-red-400'}`} />
+                {telemetry.connected ? (telemetry.lastUpdate ? 'Telemetria atualizada agora' : 'Telemetria conectada') : 'Telemetria desconectada'}
               </div>
               <Link
                 to="/adesao"
@@ -292,21 +340,27 @@ export default function Central() {
         </header>
 
         <main className="mx-auto max-w-[1500px] px-4 py-6 sm:px-6 sm:py-8 xl:px-8">
-          <section className="relative overflow-hidden rounded-2xl border border-blue-400/20 bg-[var(--nx-security)] p-5 sm:p-6 lg:flex lg:items-center lg:justify-between lg:gap-8">
-            <div className="absolute -right-16 -top-24 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" aria-hidden="true" />
+          <section aria-live="polite" className={`relative overflow-hidden rounded-2xl border p-5 sm:p-6 lg:flex lg:items-center lg:justify-between lg:gap-8 ${hasAlert ? 'border-red-400/35 bg-red-950/30' : 'border-blue-400/20 bg-[var(--nx-security)]'}`}>
+            <div className={`absolute -right-16 -top-24 h-64 w-64 rounded-full blur-3xl ${hasAlert ? 'bg-red-500/10' : 'bg-blue-500/10'}`} aria-hidden="true" />
             <div className="relative flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-400/15 text-emerald-300 sm:h-14 sm:w-14">
-                <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7" />
+              <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl sm:h-14 sm:w-14 ${hasAlert ? 'bg-red-400/15 text-red-300' : 'bg-emerald-400/15 text-emerald-300'}`}>
+                {hasAlert ? <TriangleAlert className="h-6 w-6 sm:h-7 sm:w-7" /> : <ShieldCheck className="h-6 w-6 sm:h-7 sm:w-7" />}
               </div>
               <div>
-                <p className="text-xs font-semibold uppercase tracking-[0.14em] text-emerald-300">Residência protegida</p>
+                <p className={`text-xs font-semibold uppercase tracking-[0.14em] ${hasAlert ? 'text-red-300' : 'text-emerald-300'}`}>
+                  {hasAlert ? 'Alerta da telemetria' : 'Residência protegida'}
+                </p>
                 <h2 className="mt-1.5 text-xl font-bold tracking-tight text-white sm:text-2xl">
-                  {mode === 'away' ? 'Proteção total ativada' : 'Perímetro monitorado'}
+                  {smokeAlert ? 'Nível crítico de gás ou fumaça' : presenceAlert ? 'Presença detectada na residência' : mode === 'away' ? 'Proteção total ativada' : 'Perímetro monitorado'}
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-slate-400">
-                  {mode === 'away'
-                    ? 'Câmeras, sensores de movimento e acessos estão monitorando qualquer atividade.'
-                    : 'Os acessos estão protegidos e os sensores internos permitem sua circulação.'}
+                  {smokeAlert
+                    ? `O sensor registrou ${telemetry.reading.fumaca} ppm. Verifique o ambiente e acione a emergência se necessário.`
+                    : presenceAlert
+                      ? 'O sensor de presença identificou movimento enquanto o modo Ausente está ativo.'
+                      : mode === 'away'
+                        ? 'Câmeras, sensores de movimento e acessos estão monitorando qualquer atividade.'
+                        : 'Os acessos estão protegidos e os sensores internos permitem sua circulação.'}
                 </p>
               </div>
             </div>
@@ -362,15 +416,15 @@ export default function Central() {
                   <section className="rounded-2xl border border-white/[0.07] bg-[var(--nx-panel)] p-5">
                     <div className="mb-4 flex items-center justify-between gap-3">
                       <div>
-                        <h2 className="text-base font-bold text-white">Status dos sensores</h2>
-                        <p className="mt-1 text-xs text-slate-500">Leituras mais recentes</p>
+                        <h2 className="text-base font-bold text-white">Telemetria ao vivo</h2>
+                        <p className="mt-1 text-xs text-slate-500">Presença, gás/fumaça, temperatura e umidade</p>
                       </div>
-                      <CheckCircle2 className="h-5 w-5 text-emerald-300" />
+                      {hasAlert ? <TriangleAlert className="h-5 w-5 text-red-300" /> : <CheckCircle2 className={`h-5 w-5 ${telemetry.connected ? 'text-emerald-300' : 'text-slate-500'}`} />}
                     </div>
-                    {sensors.length ? (
+                    {liveSensors.length ? (
                       <>
                         <div className="divide-y divide-white/[0.06]">
-                          {sensors.slice(0, 4).map((sensor) => <SensorRow key={sensor.id} sensor={sensor} />)}
+                          {liveSensors.slice(0, 4).map((sensor) => <SensorRow key={sensor.id} sensor={sensor} />)}
                         </div>
                         <button type="button" onClick={() => changeView('devices')} className="mt-5 flex min-h-11 w-full items-center justify-center gap-1 rounded-xl border border-slate-700 text-sm font-semibold text-slate-300 transition hover:border-slate-500 hover:bg-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 cursor-pointer">
                           Ver todos os dispositivos <ChevronRight className="h-4 w-4" />
@@ -425,11 +479,11 @@ export default function Central() {
               <section>
                 <div className="mb-5">
                   <h2 className="text-lg font-bold text-white">Sensores instalados</h2>
-                  <p className="mt-1 text-sm text-slate-400">Status, leituras e nível de bateria.</p>
+                  <p className="mt-1 text-sm text-slate-400">Leituras ao vivo, status e conectividade.</p>
                 </div>
-                {sensors.length ? (
+                {liveSensors.length ? (
                   <div className="divide-y divide-white/[0.06] rounded-2xl border border-white/[0.07] bg-[var(--nx-panel)] px-5 py-2">
-                    {sensors.map((sensor) => <SensorRow key={sensor.id} sensor={sensor} showBattery />)}
+                    {liveSensors.map((sensor) => <SensorRow key={sensor.id} sensor={sensor} showBattery />)}
                   </div>
                 ) : <EmptyState type="sensor" />}
               </section>
@@ -441,7 +495,7 @@ export default function Central() {
                 {otherDevices.length ? (
                   <div className="space-y-3">
                     {otherDevices.map((device) => (
-                      <OtherDeviceRow key={device.id} device={device} locked={locked} sirenArmed={sirenArmed} onToggleLock={handleToggleLock} onToggleSiren={handleToggleSiren} />
+                      <OtherDeviceRow key={device.id} device={device} locked={locked} onToggleLock={handleToggleLock} />
                     ))}
                   </div>
                 ) : (

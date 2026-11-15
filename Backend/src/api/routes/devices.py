@@ -17,14 +17,6 @@ DEVICES_CATALOG = [
         installation_price=199.00,
     ),
     DeviceOut(
-        id=2,
-        name="Câmera Dome Interna 360°",
-        description="Cobertura panorâmica interna com rastreamento de movimento e áudio bidirecional.",
-        category="camera",
-        monthly_price=39.90,
-        installation_price=149.00,
-    ),
-    DeviceOut(
         id=3,
         name="Sensor de Movimento NX-Motion",
         description="Sensor infravermelho com imunidade a pets e alertas instantâneos no aplicativo.",
@@ -66,11 +58,19 @@ DEVICES_CATALOG = [
     ),
     DeviceOut(
         id=8,
-        name="Sirene Externa NX-Siren",
-        description="Sirene de alta potência com luz estroboscópica e acionamento automático em invasões.",
-        category="alarme",
-        monthly_price=24.90,
-        installation_price=99.00,
+        name="Sensor de Temperatura NX-Temp",
+        description="Monitoramento contínuo da temperatura ambiente com leituras em tempo real na central NexGuard.",
+        category="sensor",
+        monthly_price=16.90,
+        installation_price=69.00,
+    ),
+    DeviceOut(
+        id=9,
+        name="Sensor de Umidade NX-Humidity",
+        description="Acompanhamento da umidade relativa do ar com telemetria ao vivo e histórico de leituras.",
+        category="sensor",
+        monthly_price=16.90,
+        installation_price=69.00,
     ),
 ]
 

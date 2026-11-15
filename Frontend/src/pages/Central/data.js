@@ -39,6 +39,50 @@ export const DEFAULT_CAMERAS = [
 
 export const DEFAULT_SENSORS = [
   {
+    id: 'sensor-movimento',
+    name: 'Presença no ambiente',
+    model: 'Sensor de Movimento NX-Motion',
+    icon: 'motion',
+    telemetryKey: 'presence',
+    status: 'Aguardando leitura',
+    detail: 'Telemetria ao vivo',
+    battery: null,
+    tone: 'neutral',
+  },
+  {
+    id: 'sensor-fumaca',
+    name: 'Gás e fumaça',
+    model: 'Detector de Fumaça e Gás',
+    icon: 'smoke',
+    telemetryKey: 'smoke',
+    status: 'Aguardando leitura',
+    detail: 'Telemetria ao vivo',
+    battery: null,
+    tone: 'neutral',
+  },
+  {
+    id: 'sensor-temperatura',
+    name: 'Temperatura do ambiente',
+    model: 'Sensor de Temperatura NX-Temp',
+    icon: 'temperature',
+    telemetryKey: 'temperature',
+    status: 'Aguardando leitura',
+    detail: 'Telemetria ao vivo',
+    battery: null,
+    tone: 'neutral',
+  },
+  {
+    id: 'sensor-umidade',
+    name: 'Umidade do ambiente',
+    model: 'Sensor de Umidade NX-Humidity',
+    icon: 'humidity',
+    telemetryKey: 'humidity',
+    status: 'Aguardando leitura',
+    detail: 'Telemetria ao vivo',
+    battery: null,
+    tone: 'neutral',
+  },
+  {
     id: 'sensor-porta',
     name: 'Porta de entrada',
     model: 'Sensor de abertura',
@@ -46,16 +90,6 @@ export const DEFAULT_SENSORS = [
     status: 'Fechada',
     detail: 'Atualizado agora',
     battery: 96,
-    tone: 'safe',
-  },
-  {
-    id: 'sensor-movimento',
-    name: 'Sala de estar',
-    model: 'Sensor de movimento',
-    icon: 'motion',
-    status: 'Sem movimento',
-    detail: 'Último evento há 12 min',
-    battery: 88,
     tone: 'safe',
   },
   {
@@ -68,54 +102,23 @@ export const DEFAULT_SENSORS = [
     battery: 91,
     tone: 'safe',
   },
-  {
-    id: 'sensor-fumaca',
-    name: 'Cozinha',
-    model: 'Detector de fumaça e gás',
-    icon: 'smoke',
-    status: 'Ar normal',
-    detail: 'Nenhum risco identificado',
-    battery: 94,
-    tone: 'safe',
-  },
-  {
-    id: 'sensor-temperatura',
-    name: 'Ambiente interno',
-    model: 'Sensor de temperatura',
-    icon: 'temperature',
-    status: '23 °C',
-    detail: 'Umidade relativa de 54%',
-    battery: 89,
-    tone: 'neutral',
-  },
-  {
-    id: 'sensor-garagem',
-    name: 'Garagem',
-    model: 'Sensor de movimento',
-    icon: 'motion',
-    status: 'Sem movimento',
-    detail: 'Último evento há 48 min',
-    battery: 85,
-    tone: 'safe',
-  },
 ];
 
 export const DEFAULT_OTHER_DEVICES = [
   { id: 'lock', name: 'Porta principal', model: 'Fechadura Inteligente NX-Lock', type: 'lock', online: true },
   { id: 'hub', name: 'Central da residência', model: 'Central de Alarme NX-Hub', type: 'hub', online: true },
-  { id: 'siren', name: 'Sirene externa', model: 'Sirene NX-Siren', type: 'siren', online: true },
 ];
 
 export const INITIAL_EVENTS = [
-  { id: 1, title: 'Porta de entrada fechada', time: 'Há 4 min', type: 'door' },
-  { id: 2, title: 'Movimento na sala de estar', time: 'Há 12 min', type: 'motion' },
-  { id: 3, title: 'Verificação dos dispositivos concluída', time: 'Há 1 h', type: 'system' },
+  { id: 1, title: 'Central de controle iniciada', time: 'Agora', type: 'system' },
 ];
 
 const SENSOR_TEMPLATES = {
-  3: { icon: 'motion', status: 'Sem movimento', detail: 'Monitoramento ativo', names: ['Sala de estar', 'Garagem', 'Corredor'] },
-  4: { icon: 'door', status: 'Fechada', detail: 'Atualizado agora', names: ['Porta de entrada', 'Janela da cozinha', 'Porta dos fundos'] },
-  7: { icon: 'smoke', status: 'Ar normal', detail: 'Nenhum risco identificado', names: ['Cozinha', 'Área de serviço'] },
+  3: { icon: 'motion', telemetryKey: 'presence', status: 'Aguardando leitura', detail: 'Telemetria ao vivo', tone: 'neutral', names: ['Presença no ambiente'] },
+  4: { icon: 'door', status: 'Fechada', detail: 'Atualizado agora', tone: 'safe', names: ['Porta de entrada', 'Janela da cozinha', 'Porta dos fundos'] },
+  7: { icon: 'smoke', telemetryKey: 'smoke', status: 'Aguardando leitura', detail: 'Telemetria ao vivo', tone: 'neutral', names: ['Gás e fumaça'] },
+  8: { icon: 'temperature', telemetryKey: 'temperature', status: 'Aguardando leitura', detail: 'Telemetria ao vivo', tone: 'neutral', names: ['Temperatura do ambiente'] },
+  9: { icon: 'humidity', telemetryKey: 'humidity', status: 'Aguardando leitura', detail: 'Telemetria ao vivo', tone: 'neutral', names: ['Umidade do ambiente'] },
 };
 
 export function buildDashboardData(selectedDevices) {
@@ -152,19 +155,20 @@ export function buildDashboardData(selectedDevices) {
       for (let index = 0; index < quantity; index += 1) {
         sensors.push({
           id: `${device.id}-${index}`,
-          name: template.names[index] ?? `Ambiente ${index + 1}`,
+          name: template.names[index] ?? `${template.names[0]} ${index + 1}`,
           model: device.name,
           icon: template.icon,
+          telemetryKey: index === 0 ? template.telemetryKey : undefined,
           status: template.status,
           detail: template.detail,
-          battery: 96 - index * 3,
-          tone: 'safe',
+          battery: template.telemetryKey ? null : 96 - index * 3,
+          tone: template.tone ?? 'safe',
         });
       }
       return;
     }
 
-    const type = device.category === 'fechadura' ? 'lock' : device.category === 'alarme' ? 'siren' : 'hub';
+    const type = device.category === 'fechadura' ? 'lock' : 'hub';
     otherDevices.push({
       id: `${device.id}`,
       name: device.name,

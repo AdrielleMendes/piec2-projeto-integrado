@@ -21,7 +21,7 @@ const PLANS = [
     icon: 'star',
     tagline: 'Cobertura completa com câmeras inteligentes',
     highlighted: true,
-    items: { 6: 1, 1: 1, 2: 1, 3: 2, 4: 2 },
+    items: { 6: 1, 1: 1, 3: 2, 4: 2 },
   },
   {
     id: 'premium',
@@ -29,7 +29,7 @@ const PLANS = [
     icon: 'crown',
     tagline: 'Blindagem máxima para toda a residência',
     highlighted: false,
-    items: { 6: 1, 1: 2, 2: 2, 3: 3, 4: 4, 5: 2, 7: 2, 8: 1 },
+    items: { 6: 1, 1: 2, 3: 3, 4: 4, 5: 2, 7: 2, 8: 1, 9: 1 },
   },
 ];
 
