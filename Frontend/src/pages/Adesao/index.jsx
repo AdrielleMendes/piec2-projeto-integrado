@@ -165,6 +165,7 @@ export default function Adesao() {
                 state={{
                   selectedDevices: selectedItems.map(({ device, quantity }) => ({ ...device, quantity })),
                   customerName: completedOrder.customer_name,
+                  planName,
                 }}
                 className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/30 cursor-pointer text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
               >

@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   Activity,
-  ArrowLeft,
   Camera,
   Cctv,
   Check,
@@ -28,6 +27,7 @@ import {
 import useTelemetry from '../../hooks/useTelemetry';
 import CameraCard from './components/CameraCard';
 import SensorRow from './components/SensorRow';
+import SubscriptionDialog from './components/SubscriptionDialog';
 import { buildDashboardData, INITIAL_EVENTS } from './data';
 
 const NAV_ITEMS = [
@@ -186,14 +186,20 @@ function OtherDeviceRow({ device, locked, onToggleLock }) {
 export default function Central() {
   const location = useLocation();
   const telemetry = useTelemetry();
-  const { cameras, sensors, otherDevices } = useMemo(
-    () => buildDashboardData(location.state?.selectedDevices),
+  const selectedDevices = useMemo(
+    () => location.state?.selectedDevices ?? [],
     [location.state?.selectedDevices]
+  );
+  const activePlan = location.state?.planName ?? null;
+  const { cameras, sensors, otherDevices } = useMemo(
+    () => buildDashboardData(selectedDevices),
+    [selectedDevices]
   );
 
   const [activeView, setActiveView] = useState('overview');
   const [mode, setMode] = useState('home');
   const [locked, setLocked] = useState(true);
+  const [subscriptionOpen, setSubscriptionOpen] = useState(false);
   const [selectedCamera, setSelectedCamera] = useState(null);
   const [streamPaused, setStreamPaused] = useState(false);
   const [toast, setToast] = useState('');
@@ -321,14 +327,16 @@ export default function Central() {
                 <span className={`h-2 w-2 rounded-full ${telemetry.connected ? 'bg-emerald-400' : 'bg-red-400'}`} />
                 {telemetry.connected ? (telemetry.lastUpdate ? 'Telemetria atualizada agora' : 'Telemetria conectada') : 'Telemetria desconectada'}
               </div>
-              <Link
-                to="/adesao"
-                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-700 px-3 text-xs font-semibold text-slate-300 transition hover:border-slate-500 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 sm:px-4 sm:text-sm"
+              <button
+                type="button"
+                onClick={() => setSubscriptionOpen(true)}
+                aria-haspopup="dialog"
+                className="inline-flex min-h-11 items-center gap-2 rounded-xl border border-slate-700 px-3 text-xs font-semibold text-slate-300 transition hover:border-slate-500 hover:bg-slate-800 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400 sm:px-4 sm:text-sm cursor-pointer"
               >
-                <ArrowLeft className="h-4 w-4" />
+                <ChevronRight className="h-4 w-4" />
                 <span className="hidden sm:inline">Minha adesão</span>
                 <span className="sm:hidden">Adesão</span>
-              </Link>
+              </button>
               <div className="flex h-10 w-10 items-center justify-center rounded-full bg-slate-800 text-sm font-bold text-blue-300 lg:hidden">{customerName.charAt(0)}</div>
             </div>
           </div>
@@ -506,6 +514,13 @@ export default function Central() {
           )}
         </main>
       </div>
+
+      <SubscriptionDialog
+        open={subscriptionOpen}
+        onClose={() => setSubscriptionOpen(false)}
+        devices={selectedDevices}
+        planName={activePlan}
+      />
 
       {selectedCamera && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6" role="dialog" aria-modal="true" aria-labelledby="camera-modal-title">
