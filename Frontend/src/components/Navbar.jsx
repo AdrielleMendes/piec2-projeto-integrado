@@ -95,8 +95,6 @@ export default function Navbar() {
                 <a href={anchor('sobre')} className="hover:text-blue-500 transition-colors">A Empresa</a>
                 <a href={anchor('servicos')} className="hover:text-blue-500 transition-colors">Serviços</a>
                 <a href={anchor('tecnologia')} className="hover:text-blue-500 transition-colors">Tecnologia</a>
-                <Link to="/planos" className="hover:text-blue-500 transition-colors">Planos</Link>
-                <Link to="/central" className="hover:text-blue-500 transition-colors">Central</Link>
               </div>
 
             </div>
@@ -144,8 +142,6 @@ export default function Navbar() {
             >
               Tecnologia
             </a>
-            <Link to="/planos" onClick={() => setMobileMenuOpen(false)} className={`block py-2 ${isLightMode && scrolled ? "text-slate-800" : "text-slate-300"}`}>Planos</Link>
-            <Link to="/central" onClick={() => setMobileMenuOpen(false)} className={`block py-2 ${isLightMode && scrolled ? "text-slate-800" : "text-slate-300"}`}>Central</Link>
           </div>
         )}
       </nav>
