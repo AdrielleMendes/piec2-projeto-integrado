@@ -21,7 +21,7 @@ const PLANS = [
     icon: 'star',
     tagline: 'Cobertura completa com câmeras inteligentes',
     highlighted: true,
-    items: { 6: 1, 1: 1, 3: 2, 4: 2 },
+    items: { 1: 2, 2: 2, 3: 1, 5: 1, 7: 1, 8: 1, 9: 1 },
   },
   {
     id: 'premium',
