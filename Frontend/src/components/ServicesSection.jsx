@@ -1,4 +1,3 @@
-import React from 'react';
 import { Shield, Eye, Smartphone, HeadphoneOff } from 'lucide-react';
 
 export default function ServicesSection() {

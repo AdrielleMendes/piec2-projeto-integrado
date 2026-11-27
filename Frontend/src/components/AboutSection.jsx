@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { CheckCircle2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function AboutSection() {

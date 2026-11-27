@@ -1,11 +1,24 @@
+# Configuração local e credenciais
+.env
+.env.*
+!.env.example
+
 # Python
 __pycache__/
 *.py[cod]
+.pytest_cache/
+.venv/
 venv/
 
-# Node
+# Node e builds
 node_modules/
 dist/
+
+# Dados e modelos locais
+Backend/data/
+Backend/models/*.onnx
+Backend/models/*.onnx.part
+*.log
 
 # Sistema operacional / editores
 .DS_Store

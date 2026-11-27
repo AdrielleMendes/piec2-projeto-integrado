@@ -51,3 +51,10 @@ export function createOrder(payload) {
     body: JSON.stringify(payload),
   });
 }
+
+export function createLead(payload) {
+  return request('/api/v1/leads/', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  });
+}

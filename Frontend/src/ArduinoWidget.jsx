@@ -1,29 +1,17 @@
-import React, { useEffect, useState } from 'react';
-import { io } from 'socket.io-client';
+import useTelemetry from './hooks/useTelemetry';
+
+const formatMeasurement = (value) => (
+  typeof value === 'number' && Number.isFinite(value) ? value.toFixed(1) : '--'
+);
 
 export default function ArduinoWidget() {
-  const [dados, setDados] = useState({ temperatura: '0.0', umidade: '0.0', fumaca: 0, presenca: false });
-  const [conectado, setConectado] = useState(false);
-
-  useEffect(() => {
-    const socket = io('http://localhost:3001');
-
-    socket.on('connect', () => setConectado(true));
-    socket.on('disconnect', () => setConectado(false));
-
-    socket.on('dados-sensor', (data) => {
-      const temPresenca = data.distancia !== undefined && data.distancia > 0 && data.distancia < 30;
-
-      setDados({
-        temperatura: data.temperatura !== null ? data.temperatura.toFixed(1) : '0.0',
-        umidade: data.humidade !== null ? data.humidade.toFixed(1) : '0.0', 
-        fumaca: data.fumaca ?? 0,
-        presenca: data.presenca ?? temPresenca
-      });
-    });
-
-    return () => socket.disconnect();
-  }, []);
+  const { connected: conectado, reading } = useTelemetry();
+  const dados = {
+    temperatura: formatMeasurement(reading.temperatura),
+    umidade: formatMeasurement(reading.humidade),
+    fumaca: reading.fumaca ?? '--',
+    presenca: Boolean(reading.presenca),
+  };
 
   const isFumacaAlta = dados.fumaca > 400;
 

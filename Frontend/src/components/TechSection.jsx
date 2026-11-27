@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Camera, Radio, ShieldAlert, Cpu, Fingerprint, Wifi, CheckCircle2, ChevronRight } from 'lucide-react';
 
 export default function TechSection() {

@@ -1,0 +1,8 @@
+fastapi==0.159.1
+uvicorn[standard]==0.54.0
+pydantic[email]==2.14.1
+numpy==2.5.5
+opencv-python-headless==5.1.0.95
+cryptography==50.0.2
+python-dotenv==1.2.4
+httpx==0.29.0
