@@ -61,7 +61,8 @@ class NexGuardApiTests(unittest.TestCase):
         devices = response.json()
         ids = [device["id"] for device in devices]
         self.assertEqual(len(ids), len(set(ids)))
-        self.assertEqual(set(ids), set(range(1, 11)))
+        self.assertEqual(set(ids), set(range(1, 10)))
+        self.assertNotIn("Sirene Externa NX-Siren", {device["name"] for device in devices})
         self.assertEqual(next(item for item in devices if item["id"] == 8)["category"], "sensor")
 
     def test_02_lead_is_persisted_and_admin_is_required(self) -> None:
@@ -107,14 +108,13 @@ class NexGuardApiTests(unittest.TestCase):
             "items": [
                 {"device_id": 8, "quantity": 1},
                 {"device_id": 9, "quantity": 2},
-                {"device_id": 10, "quantity": 1},
             ],
         }
         response = self.client.post("/api/v1/orders/", json=payload)
         self.assertEqual(response.status_code, 201, response.text)
         order = response.json()
-        self.assertEqual(order["monthly_total"], 75.60)
-        self.assertEqual(order["installation_total"], 306.00)
+        self.assertEqual(order["monthly_total"], 50.70)
+        self.assertEqual(order["installation_total"], 207.00)
 
         connection = sqlite3.connect(os.environ["DATABASE_PATH"])
         try:
@@ -126,7 +126,7 @@ class NexGuardApiTests(unittest.TestCase):
             connection.close()
         self.assertIsNotNone(stored)
         self.assertEqual(stored[1], payload["customer_email"])
-        self.assertEqual(len(json.loads(stored[0])), 3)
+        self.assertEqual(len(json.loads(stored[0])), 2)
 
     def test_04_order_validation_rejects_invalid_items(self) -> None:
         base_payload = {

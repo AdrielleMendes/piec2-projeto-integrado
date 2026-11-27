@@ -212,7 +212,7 @@ DEVICE_CATALOG = [
     {"id": 7, "name": "Detector de Fumaça e Gás", "description": "Detecção precoce de fumaça, monóxido de carbono e vazamento de gás com sirene integrada.", "category": "sensor", "monthly_price": 17.90, "installation_price": 89.00},
     {"id": 8, "name": "Sensor de Temperatura NX-Temp", "description": "Monitoramento contínuo da temperatura ambiente com leituras em tempo real na central NexGuard.", "category": "sensor", "monthly_price": 16.90, "installation_price": 69.00},
     {"id": 9, "name": "Sensor de Umidade NX-Humidity", "description": "Acompanhamento da umidade relativa do ar com telemetria ao vivo e histórico de leituras.", "category": "sensor", "monthly_price": 16.90, "installation_price": 69.00},
-    {"id": 10, "name": "Sirene Externa NX-Siren", "description": "Sirene de alta potência com luz estroboscópica e acionamento automático em invasões.", "category": "alarme", "monthly_price": 24.90, "installation_price": 99.00},
+    # A Sirene Externa NX-Siren foi retirada do catálogo comercial.
 ]
 
 
