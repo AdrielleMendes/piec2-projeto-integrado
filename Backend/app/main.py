@@ -203,15 +203,15 @@ async def startup() -> None:
 
 # IDs estáveis: os planos atuais usam 8 e 9 para temperatura e umidade.
 DEVICE_CATALOG = [
-    {"id": 1, "name": "Câmera Inteligente NX-Cam 4K", "description": "Câmera externa 4K com visão noturna colorida, detecção de pessoas e resistência IP66.", "category": "camera", "monthly_price": 49.90, "installation_price": 199.00},
-    {"id": 2, "name": "Câmera Dome Interna 360°", "description": "Cobertura panorâmica interna com rastreamento de movimento e áudio bidirecional.", "category": "camera", "monthly_price": 39.90, "installation_price": 149.00},
-    {"id": 3, "name": "Sensor de Movimento NX-Motion", "description": "Sensor infravermelho com imunidade a pets e alertas instantâneos no aplicativo.", "category": "sensor", "monthly_price": 19.90, "installation_price": 79.00},
-    {"id": 4, "name": "Sensor de Abertura Porta/Janela", "description": "Sensor magnético discreto que detecta aberturas não autorizadas em portas e janelas.", "category": "sensor", "monthly_price": 14.90, "installation_price": 59.00},
-    {"id": 5, "name": "Fechadura Inteligente NX-Lock", "description": "Fechadura biométrica com senhas temporárias, histórico de acessos e trava automática.", "category": "fechadura", "monthly_price": 59.90, "installation_price": 249.00},
-    {"id": 6, "name": "Central de Alarme NX-Hub", "description": "Hub central com bateria reserva, conectividade 4G redundante e automações locais.", "category": "central", "monthly_price": 69.90, "installation_price": 299.00},
-    {"id": 7, "name": "Detector de Fumaça e Gás", "description": "Detecção precoce de fumaça, monóxido de carbono e vazamento de gás com sirene integrada.", "category": "sensor", "monthly_price": 17.90, "installation_price": 89.00},
-    {"id": 8, "name": "Sensor de Temperatura NX-Temp", "description": "Monitoramento contínuo da temperatura ambiente com leituras em tempo real na central NexGuard.", "category": "sensor", "monthly_price": 16.90, "installation_price": 69.00},
-    {"id": 9, "name": "Sensor de Umidade NX-Humidity", "description": "Acompanhamento da umidade relativa do ar com telemetria ao vivo e histórico de leituras.", "category": "sensor", "monthly_price": 16.90, "installation_price": 69.00},
+    {"id": 1, "name": "Câmera Inteligente NX-Cam 4K", "description": "Câmera externa 4K com visão noturna colorida, detecção de pessoas e resistência IP66.", "category": "camera", "monthly_price": 29.90, "installation_price": 129.00},
+    {"id": 2, "name": "Câmera Dome Interna 360°", "description": "Cobertura panorâmica interna com rastreamento de movimento e áudio bidirecional.", "category": "camera", "monthly_price": 24.90, "installation_price": 99.00},
+    {"id": 3, "name": "Sensor de Movimento NX-Motion", "description": "Sensor infravermelho com imunidade a pets e alertas instantâneos no aplicativo.", "category": "sensor", "monthly_price": 9.90, "installation_price": 49.00},
+    {"id": 4, "name": "Sensor de Abertura Porta/Janela", "description": "Sensor magnético discreto que detecta aberturas não autorizadas em portas e janelas.", "category": "sensor", "monthly_price": 7.90, "installation_price": 39.00},
+    {"id": 5, "name": "Fechadura Inteligente NX-Lock", "description": "Fechadura biométrica com senhas temporárias, histórico de acessos e trava automática.", "category": "fechadura", "monthly_price": 34.90, "installation_price": 149.00},
+    {"id": 6, "name": "Central de Alarme NX-Hub", "description": "Hub central com bateria reserva, conectividade 4G redundante e automações locais.", "category": "central", "monthly_price": 39.90, "installation_price": 179.00},
+    {"id": 7, "name": "Detector de Fumaça e Gás", "description": "Detecção precoce de fumaça, monóxido de carbono e vazamento de gás com sirene integrada.", "category": "sensor", "monthly_price": 12.90, "installation_price": 59.00},
+    {"id": 8, "name": "Sensor de Temperatura NX-Temp", "description": "Monitoramento contínuo da temperatura ambiente com leituras em tempo real na central NexGuard.", "category": "sensor", "monthly_price": 8.90, "installation_price": 39.00},
+    {"id": 9, "name": "Sensor de Umidade NX-Humidity", "description": "Acompanhamento da umidade relativa do ar com telemetria ao vivo e histórico de leituras.", "category": "sensor", "monthly_price": 8.90, "installation_price": 39.00},
     # A Sirene Externa NX-Siren foi retirada do catálogo comercial.
 ]
 

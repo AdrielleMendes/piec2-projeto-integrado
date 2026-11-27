@@ -113,8 +113,8 @@ class NexGuardApiTests(unittest.TestCase):
         response = self.client.post("/api/v1/orders/", json=payload)
         self.assertEqual(response.status_code, 201, response.text)
         order = response.json()
-        self.assertEqual(order["monthly_total"], 50.70)
-        self.assertEqual(order["installation_total"], 207.00)
+        self.assertEqual(order["monthly_total"], 26.70)
+        self.assertEqual(order["installation_total"], 117.00)
 
         connection = sqlite3.connect(os.environ["DATABASE_PATH"])
         try:
