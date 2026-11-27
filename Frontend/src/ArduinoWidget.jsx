@@ -4,6 +4,7 @@ import { io } from 'socket.io-client';
 export default function ArduinoWidget() {
   const [dados, setDados] = useState({ temperatura: '0.0', umidade: '0.0', fumaca: 0, presenca: false });
   const [conectado, setConectado] = useState(false);
+  const [recebeuDados, setRecebeuDados] = useState(false);
 
   useEffect(() => {
     const socket = io('http://localhost:3001');
@@ -12,11 +13,12 @@ export default function ArduinoWidget() {
     socket.on('disconnect', () => setConectado(false));
 
     socket.on('dados-sensor', (data) => {
+      setRecebeuDados(true);
       const temPresenca = data.distancia !== undefined && data.distancia > 0 && data.distancia < 30;
 
       setDados({
-        temperatura: data.temperatura !== null ? data.temperatura.toFixed(1) : '0.0',
-        umidade: data.humidade !== null ? data.humidade.toFixed(1) : '0.0', 
+        temperatura: Number.isFinite(Number(data.temperatura)) ? Number(data.temperatura).toFixed(1) : '0.0',
+        umidade: Number.isFinite(Number(data.humidade)) ? Number(data.humidade).toFixed(1) : '0.0', 
         fumaca: data.fumaca ?? 0,
         presenca: data.presenca ?? temPresenca
       });
@@ -34,7 +36,7 @@ export default function ArduinoWidget() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight">NexGuard - Telemetria ao Vivo</h2>
-            <p className="text-slate-500 mt-2 text-lg">Monitorização de sensores em tempo real.</p>
+            <p className="text-slate-500 mt-2 text-lg">Telemetria via Socket.IO. Os valores só serão reais quando o controlador de sensores estiver conectado.</p>
           </div>
           <span className={`px-5 py-2 rounded-full text-sm font-bold tracking-wide shadow-sm flex items-center gap-2 ${
             conectado 
@@ -42,7 +44,7 @@ export default function ArduinoWidget() {
               : 'bg-red-100 text-red-800 border border-red-200'
           }`}>
             <span className={`w-2.5 h-2.5 rounded-full ${conectado ? 'bg-emerald-500 animate-pulse' : 'bg-red-500'}`}></span>
-            {conectado ? 'Sistema Online' : 'Desconectado'}
+            {conectado ? (recebeuDados ? 'Telemetria recebida' : 'Gateway conectado · aguardando Arduino') : 'Gateway desconectado'}
           </span>
         </div>
 

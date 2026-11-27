@@ -160,17 +160,28 @@ export default function Adesao() {
             </div>
 
             <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+              <Link
+                to="/central"
+                state={{
+                  selectedDevices: selectedItems.map(({ device, quantity }) => ({ ...device, quantity })),
+                  customerName: completedOrder.customer_name,
+                }}
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/30 cursor-pointer text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400"
+              >
+                <ShieldCheck className="w-4 h-4" />
+                <span>Acessar Central de Controle</span>
+              </Link>
               <button
                 type="button"
                 onClick={handleReset}
-                className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg shadow-blue-600/30 cursor-pointer text-sm"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold rounded-xl border border-slate-700 transition-all duration-300 cursor-pointer text-sm"
               >
                 <PackageCheck className="w-4 h-4" />
                 <span>Nova Adesão</span>
               </button>
               <Link
                 to="/"
-                className="w-full sm:w-auto px-7 py-3.5 bg-slate-800 hover:bg-slate-700 text-slate-200 hover:text-white font-semibold rounded-xl border border-slate-700 transition-all duration-300 cursor-pointer text-sm"
+                className="w-full sm:w-auto px-7 py-3.5 text-slate-400 hover:text-white font-semibold rounded-xl transition-all duration-300 cursor-pointer text-sm"
               >
                 Voltar ao Início
               </Link>
