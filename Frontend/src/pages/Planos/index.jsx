@@ -13,7 +13,7 @@ const PLANS = [
     icon: 'shield',
     tagline: 'Proteção essencial para o dia a dia',
     highlighted: false,
-    items: { 6: 1, 3: 1, 4: 2 },
+    items: { 3: 1, 4: 2 },
   },
   {
     id: 'pro',
@@ -29,7 +29,7 @@ const PLANS = [
     icon: 'crown',
     tagline: 'Blindagem máxima para toda a residência',
     highlighted: false,
-    items: { 6: 1, 1: 2, 3: 3, 4: 4, 5: 2, 7: 2, 8: 1, 9: 1 },
+    items: { 1: 2, 3: 3, 4: 4, 5: 2, 7: 2, 8: 1, 9: 1 },
   },
 ];
 

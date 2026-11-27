@@ -61,8 +61,10 @@ class NexGuardApiTests(unittest.TestCase):
         devices = response.json()
         ids = [device["id"] for device in devices]
         self.assertEqual(len(ids), len(set(ids)))
-        self.assertEqual(set(ids), set(range(1, 10)))
-        self.assertNotIn("Sirene Externa NX-Siren", {device["name"] for device in devices})
+        self.assertEqual(set(ids), {1, 2, 3, 4, 5, 7, 8, 9})
+        names = {device["name"] for device in devices}
+        self.assertNotIn("Sirene Externa NX-Siren", names)
+        self.assertNotIn("Central de Alarme NX-Hub", names)
         self.assertEqual(next(item for item in devices if item["id"] == 8)["category"], "sensor")
 
     def test_02_lead_is_persisted_and_admin_is_required(self) -> None:
@@ -142,11 +144,13 @@ class NexGuardApiTests(unittest.TestCase):
                 "state": "SP",
             },
         }
-        unknown_device = self.client.post(
-            "/api/v1/orders/",
-            json={**base_payload, "items": [{"device_id": 999, "quantity": 1}]},
-        )
-        self.assertEqual(unknown_device.status_code, 422)
+        for unavailable_device_id in (6, 999):
+            with self.subTest(device_id=unavailable_device_id):
+                unavailable_device = self.client.post(
+                    "/api/v1/orders/",
+                    json={**base_payload, "items": [{"device_id": unavailable_device_id, "quantity": 1}]},
+                )
+                self.assertEqual(unavailable_device.status_code, 422)
         empty_order = self.client.post("/api/v1/orders/", json={**base_payload, "items": []})
         self.assertEqual(empty_order.status_code, 422)
 

@@ -1,11 +1,10 @@
-import { Cctv, Radar, Lock, Cpu, Siren, Shield, Check, Minus, Plus } from 'lucide-react';
+import { Cctv, Radar, Lock, Siren, Shield, Check, Minus, Plus } from 'lucide-react';
 import { formatCurrency } from '../../../utils/format';
 
 const CATEGORY_ICONS = {
   camera: Cctv,
   sensor: Radar,
   fechadura: Lock,
-  central: Cpu,
   alarme: Siren,
 };
 

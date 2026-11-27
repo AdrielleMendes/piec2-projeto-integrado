@@ -106,7 +106,6 @@ export const DEFAULT_SENSORS = [
 
 export const DEFAULT_OTHER_DEVICES = [
   { id: 'lock', name: 'Porta principal', model: 'Fechadura Inteligente NX-Lock', type: 'lock', online: true },
-  { id: 'hub', name: 'Central da residência', model: 'Central de Alarme NX-Hub', type: 'hub', online: true },
 ];
 
 export const INITIAL_EVENTS = [
@@ -168,14 +167,15 @@ export function buildDashboardData(selectedDevices) {
       return;
     }
 
-    const type = device.category === 'fechadura' ? 'lock' : 'hub';
-    otherDevices.push({
-      id: `${device.id}`,
-      name: device.name,
-      model: 'Instalado nesta residência',
-      type,
-      online: true,
-    });
+    if (device.category === 'fechadura') {
+      otherDevices.push({
+        id: `${device.id}`,
+        name: device.name,
+        model: 'Instalado nesta residência',
+        type: 'lock',
+        online: true,
+      });
+    }
   });
 
   return { cameras, sensors, otherDevices };
