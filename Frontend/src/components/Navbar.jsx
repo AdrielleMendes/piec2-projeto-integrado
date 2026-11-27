@@ -97,7 +97,6 @@ export default function Navbar() {
                 <a href={anchor('tecnologia')} className="hover:text-blue-500 transition-colors">Tecnologia</a>
                 <Link to="/planos" className="hover:text-blue-500 transition-colors">Planos</Link>
                 <Link to="/central" className="hover:text-blue-500 transition-colors">Central</Link>
-                <Link to="/controle-acesso" className="rounded-lg bg-blue-600 px-3 py-2 text-white transition hover:bg-blue-500">Controle de acesso</Link>
               </div>
 
             </div>
@@ -147,7 +146,6 @@ export default function Navbar() {
             </a>
             <Link to="/planos" onClick={() => setMobileMenuOpen(false)} className={`block py-2 ${isLightMode && scrolled ? "text-slate-800" : "text-slate-300"}`}>Planos</Link>
             <Link to="/central" onClick={() => setMobileMenuOpen(false)} className={`block py-2 ${isLightMode && scrolled ? "text-slate-800" : "text-slate-300"}`}>Central</Link>
-            <Link to="/controle-acesso" onClick={() => setMobileMenuOpen(false)} className="block rounded-lg bg-blue-600 px-3 py-2 font-semibold text-white">Controle de acesso</Link>
           </div>
         )}
       </nav>
